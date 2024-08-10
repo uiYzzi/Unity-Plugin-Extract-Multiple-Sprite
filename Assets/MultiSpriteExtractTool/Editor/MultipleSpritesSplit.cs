@@ -34,13 +34,18 @@ public class MultipleSpritesSplit : MonoBehaviour {
     {
         SlipAtlas(true, true);
     }
+    [MenuItem("Assets/STGame/SpriteTool/Slip This Atlas (Folder,Original Name)", false, 0)]
+    public static void SlipAtlasFolderOriginalName()
+    {
+        SlipAtlas(true, false, true);
+    }
     [MenuItem("Assets/STGame/SpriteTool/Slip This Atlas (Folder,No Prefix)", false, 0)]
     public static void SlipAtlasFolder()
     {
         SlipAtlas(true);
     }
    
-    public static void SlipAtlas(bool is_folder=false, bool is_prefix=false)
+    public static void SlipAtlas(bool is_folder=false, bool is_prefix=false, bool is_OriginalName=false)
     {
         Debug.Log("toan_stt's sprites spliter tool");
         Object file = Selection.activeObject;
@@ -50,7 +55,7 @@ public class MultipleSpritesSplit : MonoBehaviour {
         //Debug.Log(fullPath + "\n" +Selection.activeObject.name);
 
         string folder = GetMyFolder(fullPath, Selection.activeObject.name);
-        //Debug.Log(folder);
+        Debug.Log(folder);
 
         UnityEngine.Object[] sprites = AssetDatabase.LoadAllAssetRepresentationsAtPath(rootPath);
 
@@ -62,7 +67,6 @@ public class MultipleSpritesSplit : MonoBehaviour {
         }
 
         for (int i =0; i < sprites.Length; i++)
-        //for (int i = 0; i < 10; i++)
         {
             string name =  i + ".png";
             if(is_prefix || !is_folder) name = Selection.activeObject.name + "_" + i + ".png";
@@ -70,6 +74,7 @@ public class MultipleSpritesSplit : MonoBehaviour {
             string new_name = folder_new + name;
             if (is_folder) name = folder_new + "/" + i + ".png";
 
+            if (is_OriginalName) new_name = folder_new + "/" + sprites[i].name + ".png";
 
             Debug.Log("Extracted: " + new_name.Replace(folder,""));
             Sprite s = (Sprite)sprites[i];
