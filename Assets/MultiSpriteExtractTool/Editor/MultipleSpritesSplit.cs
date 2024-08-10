@@ -45,43 +45,49 @@ public class MultipleSpritesSplit : MonoBehaviour {
         SlipAtlas(true);
     }
    
-    public static void SlipAtlas(bool is_folder=false, bool is_prefix=false, bool is_OriginalName=false)
+    public static void SlipAtlas(bool is_folder = false, bool is_prefix = false, bool is_OriginalName = false)
     {
         Debug.Log("toan_stt's sprites spliter tool");
-        Object file = Selection.activeObject;
-        string rootPath;
-        rootPath = AssetDatabase.GetAssetPath(file);
-        string fullPath = Path.GetFullPath(AssetDatabase.GetAssetPath(file));
-        //Debug.Log(fullPath + "\n" +Selection.activeObject.name);
 
-        string folder = GetMyFolder(fullPath, Selection.activeObject.name);
-        Debug.Log(folder);
+        List<Object> selectedObjects = new(Selection.objects);
 
-        UnityEngine.Object[] sprites = AssetDatabase.LoadAllAssetRepresentationsAtPath(rootPath);
-
-        string folder_new = folder;
-        if (is_folder)
+        foreach (Object file in selectedObjects)
         {
-            folder_new = folder + Selection.activeObject.name + "/";
-            System.IO.Directory.CreateDirectory(folder_new);
+            string rootPath;
+            rootPath = AssetDatabase.GetAssetPath(file);
+            string fullPath = Path.GetFullPath(AssetDatabase.GetAssetPath(file));
+            //Debug.Log(fullPath + "\n" +Selection.activeObject.name);
+
+            string folder = GetMyFolder(fullPath, file.name);
+            Debug.Log(folder);
+
+            UnityEngine.Object[] sprites = AssetDatabase.LoadAllAssetRepresentationsAtPath(rootPath);
+
+            string folder_new = folder;
+            if (is_folder)
+            {
+                folder_new = folder + file.name + "/";
+                System.IO.Directory.CreateDirectory(folder_new);
+            }
+
+            for (int i = 0; i < sprites.Length; i++)
+            {
+                string name = i + ".png";
+                if (is_prefix || !is_folder) name = file.name + "_" + i + ".png";
+
+                string new_name = folder_new + name;
+                if (is_folder) name = folder_new + "/" + i + ".png";
+
+                if (is_OriginalName) new_name = folder_new + "/" + sprites[i].name + ".png";
+
+                Debug.Log("Extracted: " + new_name.Replace(folder, ""));
+                Sprite s = (Sprite)sprites[i];
+
+                Texture2D tex2d = ConvertFromSprite(s);
+                System.IO.File.WriteAllBytes(new_name, tex2d.EncodeToPNG());
+            }
         }
 
-        for (int i =0; i < sprites.Length; i++)
-        {
-            string name =  i + ".png";
-            if(is_prefix || !is_folder) name = Selection.activeObject.name + "_" + i + ".png";
-
-            string new_name = folder_new + name;
-            if (is_folder) name = folder_new + "/" + i + ".png";
-
-            if (is_OriginalName) new_name = folder_new + "/" + sprites[i].name + ".png";
-
-            Debug.Log("Extracted: " + new_name.Replace(folder,""));
-            Sprite s = (Sprite)sprites[i];
-           
-            Texture2D tex2d = ConvertFromSprite(s);
-             System.IO.File.WriteAllBytes(new_name, tex2d.EncodeToPNG());
-        }
         AssetDatabase.Refresh();
     }
     
